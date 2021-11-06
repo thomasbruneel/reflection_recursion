@@ -16,16 +16,23 @@ public class Main {
             Field[] fields=o.getClass().getFields();
 
             for(Field f:fields){
-                //if field is a collection (list, map,...), iterate over children
+                //1. if field is a collection (list, map,...), iterate over children
                 if (List.class.isAssignableFrom(f.getType())) {
                     for(Object o2:(List)f.get(o)){
-                        recursiceReflection(list,o2);
+                        if(o2.getClass().isPrimitive()||isJavaLang(o2)){
+                            list.add(o2);
+                        }
+                        //if java is is own created class (Person, Adress, Toe) --> recursive that object
+                        else{
+                            recursiceReflection(list, o2);
+                        }
                     }
                 }
-                //if field is array
+                //2. if field is array
                 if(f.getType().isArray()){
                     for(int i=0; i<Array.getLength(f.get(o)); i++){
                         Object o2=Array.get(f.get(o), i);
+                        //if field is primitive (int, double, boolean) OR java class (String, Integer, Double) --> add to list
                         if(o2.getClass().isPrimitive()||isJavaLang(o2)){
                             list.add(o2);
                         }
@@ -36,8 +43,8 @@ public class Main {
                     }
                 }
 
-
-                //if java is primitive (int, double, boolean) OR java class (String, Integer, Double) --> add to list
+                //3
+                //if field is primitive (int, double, boolean) OR java class (String, Integer, Double) --> add to list
                 if(f.getType().isPrimitive()||isJavaLang(f.get(o))){
                     list.add(f.get(o));
                 }
