@@ -11,46 +11,47 @@ public class Main {
         list.forEach(o-> System.out.println(o));
     }
 
-    private static void recursiceReflection(ArrayList<Object> list, Object o) throws IllegalAccessException {
-        if(o!=null){
-            Field[] fields=o.getClass().getFields();
+    private static void recursiceReflection(ArrayList<Object> list, Object parent) throws IllegalAccessException {
+        if(parent!=null){
+            Field[] fields=parent.getClass().getFields();
 
             for(Field f:fields){
                 //1. if field is a collection (list, map,...), iterate over children
                 if (List.class.isAssignableFrom(f.getType())) {
-                    for(Object o2:(List)f.get(o)){
-                        if(o2.getClass().isPrimitive()||isJavaLang(o2)){
-                            list.add(o2);
+                    for(Object o:(List)f.get(parent)){
+                        if(o.getClass().isPrimitive()||isJavaLang(o)){
+                            list.add(o);
                         }
                         //if java is is own created class (Person, Adress, Toe) --> recursive that object
                         else{
-                            recursiceReflection(list, o2);
+                            recursiceReflection(list, o);
                         }
                     }
                 }
                 //2. if field is array
                 if(f.getType().isArray()){
-                    for(int i=0; i<Array.getLength(f.get(o)); i++){
-                        Object o2=Array.get(f.get(o), i);
+                    for(int i=0; i<Array.getLength(f.get(parent)); i++){
+                        Object o=Array.get(f.get(parent), i);
                         //if field is primitive (int, double, boolean) OR java class (String, Integer, Double) --> add to list
-                        if(o2.getClass().isPrimitive()||isJavaLang(o2)){
-                            list.add(o2);
+                        if(o.getClass().isPrimitive()||isJavaLang(o)){
+                            list.add(o);
                         }
                         //if java is is own created class (Person, Adress, Toe) --> recursive that object
                         else{
-                            recursiceReflection(list, o2);
+                            recursiceReflection(list, o);
                         }
                     }
                 }
 
                 //3
                 //if field is primitive (int, double, boolean) OR java class (String, Integer, Double) --> add to list
-                if(f.getType().isPrimitive()||isJavaLang(f.get(o))){
-                    list.add(f.get(o));
+                Object o=f.get(parent);
+                if(f.getType().isPrimitive()||isJavaLang(o)){
+                    list.add(o);
                 }
                 //if java is is own created class (Person, Adress, Toe) --> recursive that object
                 else{
-                    recursiceReflection(list, f.get(o));
+                    recursiceReflection(list, o);
                 }
             }
         }
